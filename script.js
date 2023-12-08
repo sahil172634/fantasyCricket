@@ -428,9 +428,8 @@ function nextValidation(teamArray){
 function next(){
         if(currentTeam==tossWinTeam) {
             team1Cap= document.getElementById("selectCaptain").value;
-            team1ViceCap=document.getElementById("selectVC").value
-            let checkValidation=nextValidation(tossWinTeam11) 
-            if(checkValidation){
+            team1ViceCap=document.getElementById("selectVC").value 
+            if(nextValidation(tossWinTeam11)){
                 creditScore=0
                 document.getElementById("winnerTeam").innerHTML="Now "+tossLoseTeam+ " Create your team." 
                 document.getElementById("credit").innerHTML="Credit : "+creditScore
@@ -460,53 +459,48 @@ function next(){
         teamWicket:0,
         teamOver:0
     }
-    let shot=[1,2,3,4,6,'Dot','Wicket']
-    let point
-    let ballCount=0.0;
-    let ball=1
-    let currentDate
-    let currentBatsman
-    let currentBowler
-    let shotType
-        
-    function hitBall(){
-        // document.getElementById("hitbtn").disabled=true;
-        // document.getElementById("hitbtn").innerHTML="Wait  for second";
+let shot=[1,2,3,4,6,'Dot','Wicket']
+let point
+let ballCount=0.0;
+let ball=1
+let currentDate
+let currentBatsman
+let currentBowler
+let shotType
 
-        // setTimeout(function(){
-        //     document.getElementById("hitbtn").disabled=false;
-        //     document.getElementById("hitbtn").innerHTML="HIT THE BALL";
-
-        // },1000)
-        currentDate = new Date().toLocaleString();
-        currentBatsman=document.getElementById('currentBatsman').innerText;
-        currentBowler=document.getElementById('bowlerName').innerText;
-        shotType=shot[Math.floor(Math.random()*shot.length)] 
-        
-        ballCount=ballCount+0.1
-        ballCount=ballCount.toFixed(1)
-        ballCount=parseFloat(ballCount)
-        if(ballCount==0.6||ballCount==1.6||ballCount==2.6||ballCount==3.6||ballCount==4.6){
-            ballCount=Math.round(ballCount)  
-        } 
-        if(ball==7){
-            document.getElementById("information").innerHTML=null
-            ball=1
-        } 
-        if(currentTeam==tossWinTeam){
-            firstinnig()
-        }
-         else{
-            secInnings()
-         }  
-        ball++
-            //   console.log("Ball "+ballCount+" - " +currentDate+" - "+shortType)
+function hitBall(){
+    getInformation()
+    if(currentTeam==tossWinTeam){
+        firstinnig()
     }
+    else{
+        secInnings()
+    }  
+    ball++
+}
+function getInformation(){
+    currentDate = new Date().toLocaleString();
+    currentBatsman=document.getElementById('currentBatsman').innerText;
+    currentBowler=document.getElementById('bowlerName').innerText;
+    shotType=shot[Math.floor(Math.random()*shot.length)] 
+        
+    ballCount=ballCount+0.1
+    ballCount=ballCount.toFixed(1)
+    ballCount=parseFloat(ballCount)
+    if(ballCount==0.6||ballCount==1.6||ballCount==2.6||ballCount==3.6||ballCount==4.6){
+        ballCount=Math.round(ballCount)  
+    } 
+    if(ball==7){
+        document.getElementById("information").innerHTML=null
+        ball=1
+    } 
+} 
 let batMul, bowlMul;
 function addPointToTeam(captain,viceCap,teamObj){
-    typeof(shotType)=='number'? teamObj.teamRun=teamObj.teamRun+shotType:""  
-    currentBatsman==captain?batMul=2 :currentBatsman==viceCap?batMul=1.5:batMul=1
-    currentBowler==captain?bowlMul=2:currentBowler==viceCap?bowlMul=1.5:bowlMul=1
+    typeof(shotType)=='number'? teamObj.teamRun=teamObj.teamRun+shotType:"" 
+    currentBatsman == captain ? batMul=2 : currentBatsman==viceCap ? batMul=1.5 : batMul=1
+    currentBowler == captain ? bowlMul=2 : currentBowler==viceCap ? bowlMul=1.5 : bowlMul=1
+
     if(shotType==4){
         teamObj.teamPoints+=batMul*5;
     }else if(shotType==6){
@@ -603,7 +597,7 @@ function firstinnig(){
     }
     else{            
         alert("First innings over")
-        playSecInning()
+        updateInfo()
     }
 } 
 function secInnings(){
@@ -714,7 +708,7 @@ function playMatch() {
     document.getElementById('over').innerHTML="Overs :"+ballCount
     document.getElementById("information").innerHTML+="Ball "+ball+" - " +currentDate+" - "+shotType+br
  }
-function playSecInning(){
+function updateInfo(){
     currentTeam=tossLoseTeam;
     ballCount=0
     document.getElementById('battingTeamName').innerHTML=tossLoseTeam +"(BATTING)"
