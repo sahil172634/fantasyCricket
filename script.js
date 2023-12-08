@@ -270,14 +270,12 @@ function tossWin(){
         }
         document.getElementById("selectTeam").style.display='block';
         document.getElementById("FantasyCricket").style.display='none';
-        showBatsman();
+        showPlayers("Batsman")
     }
 }
-let batPlayer= player.filter(item=>item.playingRole==="Batsman")
-let bowlPlayer=player.filter(item=>item.playingRole=="Bowler")
-let WicketKeeper=player.filter(item=>item.playingRole=="Wicketkeeper")
 
-function showPlayers(playerArray,mainArray){
+function showPlayerAsPerPlayingRole(playerArray,mainArray){
+    document.getElementById("showPlayer").innerHTML=null
     for(let temp of mainArray){
         let playerInclude = playerArray.some((member)=>member.name==temp.name)
         document.getElementById("showPlayer").innerHTML+=temp.name+br+temp.playingRole+br+temp.credit+sp+
@@ -294,38 +292,18 @@ function remove1stTeamPlayers(playerArray,mainArray){
   }
 }
 
-function showBatsman(){
-    document.getElementById("showPlayer").innerHTML=null
+function showPlayers(playingRole){
+    let mainArray= player.filter(item=>item.playingRole===playingRole)
     if(currentTeam==tossWinTeam){
-        showPlayers(tossWinTeam11,batPlayer)
+        showPlayerAsPerPlayingRole(tossWinTeam11,mainArray)
     }else{    
-        remove1stTeamPlayers(tossWinTeam11,batPlayer)
-        showPlayers(tossLoseTeam11,batPlayer)
-    }
-} 
-
-function showBowler(){
-    document.getElementById("showPlayer").innerHTML=null
-    if(currentTeam==tossWinTeam){
-        showPlayers(tossWinTeam11,bowlPlayer)
-    }else{     
-        remove1stTeamPlayers(tossWinTeam11,bowlPlayer)
-        showPlayers(tossLoseTeam11,bowlPlayer)
-    }
-        
-}
-function showWicketkeeper(){
-    document.getElementById("showPlayer").innerHTML=null
-    if(currentTeam==tossWinTeam){
-        showPlayers(tossWinTeam11,WicketKeeper)
-    }else{
-      remove1stTeamPlayers(tossWinTeam11,WicketKeeper)
-      showPlayers(tossLoseTeam11,WicketKeeper)
+        remove1stTeamPlayers(tossWinTeam11,mainArray)
+        showPlayerAsPerPlayingRole(tossLoseTeam11,mainArray)
     }
 }
 
-function displaySummery(array){
-    for(let temp of array){
+function displaySummery(teamArray){
+    for(let temp of teamArray){
         document.getElementById("showPlayer") .innerHTML+=temp.name+br+temp.playingRole+br+temp.credit+br
         let opt = temp.name;
         let el = document.createElement("option");
@@ -360,20 +338,20 @@ function addPlayers(teamArray){
     document.getElementById("credit").innerHTML="Credit : "+creditScore
 }
 
-function addValidation(teamArray,credit) { 
+function validationForAddingPlayer(teamArray,credit) { 
     let batsman= teamArray.filter(item=>item.playingRole==="Batsman")
     let bowler=teamArray.filter(item=>item.playingRole=="Bowler")
     let wks=teamArray.filter(item=>item.playingRole=="Wicketkeeper")
     if(credit+creditScore<=100){
-        if(member.playingRole=="Batsman" && batsman.length < 5){
-            addPlayers(teamArray)
-        }else if(member.playingRole=='Bowler' && bowler.length < 5){
-            addPlayers(teamArray)
-        }else if(member.playingRole=='Wicketkeeper'&& wks.length<1){
-            addPlayers(teamArray)
+        if(member.playingRole=="Batsman" && batsman.length > 4){
+            alert("Can not add more than 5 batsman")
+        }else if(member.playingRole=='Bowler' && bowler.length > 4){
+            alert("Can not add more than 5 bowler")
+        }else if(member.playingRole=='Wicketkeeper'&& wks.length>0){
+            alert("Can not add more than 5 Wicketkeeper")
         }
         else{
-            alert("Can not add more than 5 batsman,5 bowler and 1 Wicketkeeper")
+            addPlayers(teamArray)
         }
     }else{
         alert("credit should be less than or equal to 100")
@@ -383,26 +361,26 @@ function addValidation(teamArray,credit) {
 function addPlayerHandler(name,credit) {
     member = player.find((play)=>play.name==name);
     if(currentTeam==tossWinTeam){
-        addValidation(tossWinTeam11,credit)
+        validationForAddingPlayer(tossWinTeam11,credit)
         console.log(tossWinTeam11) 
     }else{  
-        addValidation(tossLoseTeam11,credit)
+        validationForAddingPlayer(tossLoseTeam11,credit)
         console.log(tossLoseTeam11) 
     }
 } 
-function removePlayer(array){
-    for(let i=0 ; i<array.length ; i++){
-        if (array[i].name == member.name){
+function removePlayer(teamArray){
+    for(let i=0 ; i<teamArray.length ; i++){
+        if (teamArray[i].name == member.name){
             document.getElementById(`${member.name}`).removeAttribute("disabled")
             document.getElementById(`${member.name}${member.credit}`).setAttribute("disabled", true)
-            array.splice(i, 1)
+            teamArray.splice(i, 1)
             creditScore-=member.credit;
             document.getElementById("credit").innerHTML="Credit : "+creditScore
         }                    
     }
 }  
-function removePlayerHandler(name){
-    member = player.find((play) => play.name===name) ;  
+function removePlayerHandler(playerName) {
+    member = player.find((play) => play.name===playerName) 
     if(currentTeam==tossWinTeam){
         removePlayer(tossWinTeam11)
         console.log(tossWinTeam11) 
@@ -434,7 +412,7 @@ function next(){
                 document.getElementById("winnerTeam").innerHTML="Now "+tossLoseTeam+ " Create your team." 
                 document.getElementById("credit").innerHTML="Credit : "+creditScore
                 currentTeam=tossLoseTeam 
-                showBatsman()
+                showPlayers("Batsman")
             }
         }else{
             team2Cap= document.getElementById("selectCaptain").value;
@@ -459,9 +437,9 @@ function next(){
         teamWicket:0,
         teamOver:0
     }
-let shot=[1,2,3,4,6,'Dot','Wicket']
+let shot=['Wicket']
 let point
-let ballCount=0.0;
+let overCount=0.0;
 let ball=1
 let currentDate
 let currentBatsman
@@ -482,13 +460,12 @@ function getInformation(){
     currentDate = new Date().toLocaleString();
     currentBatsman=document.getElementById('currentBatsman').innerText;
     currentBowler=document.getElementById('bowlerName').innerText;
-    shotType=shot[Math.floor(Math.random()*shot.length)] 
-        
-    ballCount=ballCount+0.1
-    ballCount=ballCount.toFixed(1)
-    ballCount=parseFloat(ballCount)
-    if(ballCount==0.6||ballCount==1.6||ballCount==2.6||ballCount==3.6||ballCount==4.6){
-        ballCount=Math.round(ballCount)  
+    shotType=shot[Math.floor(Math.random()*shot.length)]   
+    overCount+=0.1
+    overCount=overCount.toFixed(1)
+    overCount=parseFloat(overCount)
+    if(overCount==0.6||overCount==1.6||overCount==2.6||overCount==3.6||overCount==4.6){
+        overCount=Math.round(overCount)  
     } 
     if(ball==7){
         document.getElementById("information").innerHTML=null
@@ -514,10 +491,11 @@ function addPointToTeam(captain,viceCap,teamObj){
     }
 }
 
-function addPointToBatsman(teamArray){
+function addRemovePointToBatsman(teamArray,teamObj,captain,viceCap){
+    currentBatsman == captain ? batMul=2 : currentBatsman==viceCap ? batMul=1.5 : batMul=1
     for(let obj of teamArray){
         if(obj.name===currentBatsman){
-            obj.run+=shotType
+            typeof(shotType)=="number"? obj.run+=shotType:""
             obj.ballPlayed+=1
             if(shotType==4){
                 obj.point+=batMul*5
@@ -527,31 +505,25 @@ function addPointToBatsman(teamArray){
                 obj.six+=1
             }else if(shotType==1||shotType==2||shotType==3){
                 obj.point+=batMul*shotType  
-            }
+            }if(shotType=="Wicket"){
+                obj.isBat="Out"
+                if(obj.run==0){
+                    teamObj.teamPoints-=batMul*2
+                    obj.point-=batMul*2
+                }
+            }else{
             document.getElementById('currentBatsmanRun').innerHTML=obj.run
             document.getElementById("playerPoints").innerHTML=obj.point
             document.getElementById('ball').innerHTML=obj.ballPlayed
             document.getElementById('Six').innerHTML=obj.six
             document.getElementById('fours').innerHTML=obj.four
-            break;
-        }
-    }
-}
-
-function playerDismissalForDuck(teamArray,teamObj) {
-    for(let obj of teamArray){
-        if(obj.name==currentBatsman){
-            obj.isBat="Out"
-            if(obj.run==0){
-                teamObj.teamPoints-=batMul*2
-                obj.point-=batMul*2
-            }
+            break;}
         }
     }
 }
 
 function changBowler(teamArray) {  
-    if(ballCount==1||ballCount==2||ballCount==3||ballCount==4){
+    if(overCount==1||overCount==2||overCount==3||overCount==4){
         let index=teamArray.findIndex(item=>item.name===currentBowler)+1
         document.getElementById('bowlerName').innerHTML=teamArray[index].name
     }
@@ -572,26 +544,24 @@ function addPointsToBowler(teamArray) {
                 obj.point+=bowlMul*1
                 obj.dotBall+=1
             }
-            
         }
     }
 }
 function firstinnig(){
-    if(ballCount<=5&&tossWinTeamPoint.teamWicket<10) { 
+    if(overCount<=5&&tossWinTeamPoint.teamWicket<10) { 
         if(typeof(shotType)=="number"){
             addPointToTeam(team1Cap,team1ViceCap,tossWinTeamPoint)
-            addPointToBatsman(tossWinTeam11)
         }else{
-            if(shotType=="Wicket"){
-                playerDismissalForDuck(tossWinTeam11,tossWinTeamPoint)
-                changBatsman(tossWinTeam11)
-                tossWinTeamPoint.teamWicket=tossWinTeamPoint.teamWicket+1  
-                playerRun()   
-            }
             addPointToTeam(team2Cap,team2ViceCap,tossLoseTeamPoint)
+            if(shotType=="Wicket"){
+                changBatsman(tossWinTeam11)
+                tossWinTeamPoint.teamWicket+=1  
+                ResetPlayerRunsAndPoints()   
+            }
             addPointsToBowler(tossLoseTeam11)
             console.log(tossWinTeamPoint)
         }
+        addRemovePointToBatsman(tossWinTeam11,tossWinTeamPoint,team1Cap,team1ViceCap)
         changBowler(tossLoseTeam11)
         updateScoreboard(tossWinTeamPoint,tossLoseTeamPoint)
     }
@@ -601,19 +571,19 @@ function firstinnig(){
     }
 } 
 function secInnings(){
-    if(ballCount<=5&&tossWinTeamPoint.teamWicket<10) {
+    if(overCount<=5&&tossLoseTeamPoint.teamWicket<10) {
         if(typeof(shotType)=="number"){
             addPointToTeam(team2Cap,team2ViceCap,tossLoseTeamPoint)
-            addPointToBatsman(tossLoseTeam11)
+            addRemovePointToBatsman(tossLoseTeam11,tossLoseTeamPoint)
             console.log(tossLoseTeamPoint)
         }else{
-            if(shotType=="Wicket"){
-                playerDismissalForDuck(tossLoseTeam11,tossLoseTeamPoint)
-                changBatsman(tossLoseTeam11)
-                playerRun()
-                tossLoseTeamPoint.teamWicket=tossLoseTeamPoint.teamWicket+1                   
-            }
             addPointToTeam(team1Cap,team1ViceCap,tossWinTeamPoint)
+            if(shotType=="Wicket"){
+                addRemovePointToBatsman(tossLoseTeam11,tossLoseTeamPoint)
+                changBatsman(tossLoseTeam11)
+                ResetPlayerRunsAndPoints()
+                tossLoseTeamPoint.teamWicket+=1                   
+            }
             addPointsToBowler(tossWinTeam11)
             console.log(tossLoseTeamPoint)
         }
@@ -673,44 +643,27 @@ function creatTable(teamArray,batDivID,bowlDivId) {
         obj.isBall=false
     })
 }
- function playerRun(){
+ function ResetPlayerRunsAndPoints(){
     document.getElementById('currentBatsmanRun').innerHTML=0
     document.getElementById('ball').innerHTML=0
     document.getElementById('fours').innerHTML=0
     document.getElementById('Six').innerHTML=0
     document.getElementById("playerPoints").innerHTML=0
 }
-function playMatch() {
-    document.getElementById('battingTeamName').innerHTML=tossWinTeam +"(BATTING)"
-    document.getElementById('captain').innerHTML="Captain : "+team1Cap 
-    document.getElementById('vice-captain').innerHTML="Vice-Captian : "+team1ViceCap 
-    document.getElementById('battingTeamPoint').innerHTML="Points :"+0
-    document.getElementById('teamRuns').innerHTML="Runs :"+0
-    document.getElementById('Wicket').innerHTML="Wicket :"+0
-    document.getElementById('currentBatsman').innerHTML=tossWinTeam11[0].name
-    document.getElementById('bowlingTeamName').innerHTML=tossLoseTeam+"(BOWLING)"
-    document.getElementById('captain2').innerHTML="Captain : "+team2Cap 
-    document.getElementById('vice-captain2').innerHTML="Vice-Captian : "+team2ViceCap 
-    document.getElementById('over').innerHTML="Overs :"+0
-    document.getElementById('bowlingTeamPoint').innerHTML="Points :"+0
-    document.getElementById('bowlerName').innerHTML=tossLoseTeam11[5].name
-    addObjProperty(tossWinTeam11)
-    addObjProperty(tossLoseTeam11)  
-    playerRun()
-}
+
  function updateScoreboard(team1Obj,team2Obj) { 
-    team2Obj.teamOver=ballCount
+    team2Obj.teamOver=overCount
     console.log(team2Obj,"Tosslose")
     document.getElementById("battingTeamPoint").innerHTML="Points : "+team1Obj.teamPoints
     document.getElementById("teamRuns").innerHTML="Runs: "+team1Obj.teamRun
     document.getElementById("Wicket").innerHTML="Wicket : "+team1Obj.teamWicket
     document.getElementById("bowlingTeamPoint").innerHTML="Points : "+team2Obj.teamPoints
-    document.getElementById('over').innerHTML="Overs :"+ballCount
+    document.getElementById('over').innerHTML="Overs :"+overCount
     document.getElementById("information").innerHTML+="Ball "+ball+" - " +currentDate+" - "+shotType+br
  }
 function updateInfo(){
     currentTeam=tossLoseTeam;
-    ballCount=0
+    overCount=0
     document.getElementById('battingTeamName').innerHTML=tossLoseTeam +"(BATTING)"
     document.getElementById('battingTeamPoint').innerHTML="Points :"+tossLoseTeamPoint.teamPoints
     document.getElementById('teamRuns').innerHTML="Runs :"+tossLoseTeamPoint.teamRun
@@ -718,7 +671,7 @@ function updateInfo(){
     document.getElementById('currentBatsman').innerHTML= tossLoseTeam11[0].name
     document.getElementById('captain').innerHTML="Captain : "+team2Cap 
     document.getElementById('vice-captain').innerHTML="Vice-Captian : "+team2ViceCap 
-    playerRun()
+    ResetPlayerRunsAndPoints()
     document.getElementById('bowlingTeamName').innerHTML=tossWinTeam+"(BOWLING)"
     document.getElementById('captain2').innerHTML="Captain : "+team1Cap 
     document.getElementById('vice-captain2').innerHTML="Vice-Captian : "+team1ViceCap 
@@ -727,4 +680,22 @@ function updateInfo(){
     document.getElementById('bowlerName').innerHTML=tossWinTeam11[5].name
     document.getElementById("information").innerHTML=null
     ball=1
+}
+function playMatch() {
+    document.getElementById('battingTeamName').innerHTML=tossWinTeam +"(BATTING)"
+    document.getElementById('captain').innerHTML="Captain : "+team1Cap 
+    document.getElementById('vice-captain').innerHTML="Vice-Captian : "+team1ViceCap 
+    document.getElementById('battingTeamPoint').innerHTML="Points :"+tossWinTeamPoint.teamPoints
+    document.getElementById('teamRuns').innerHTML="Runs :"+tossWinTeamPoint.teamRun
+    document.getElementById('Wicket').innerHTML="Wicket :"+tossWinTeamPoint.teamWicket
+    document.getElementById('currentBatsman').innerHTML=tossWinTeam11[0].name
+    document.getElementById('bowlingTeamName').innerHTML=tossLoseTeam+"(BOWLING)"
+    document.getElementById('captain2').innerHTML="Captain : "+team2Cap 
+    document.getElementById('vice-captain2').innerHTML="Vice-Captian : "+team2ViceCap 
+    document.getElementById('over').innerHTML="Overs :"+tossLoseTeamPoint.teamOver
+    document.getElementById('bowlingTeamPoint').innerHTML="Points :"+tossLoseTeamPoint.teamPoints
+    document.getElementById('bowlerName').innerHTML=tossLoseTeam11[5].name
+    addObjProperty(tossWinTeam11)
+    addObjProperty(tossLoseTeam11)  
+    ResetPlayerRunsAndPoints()
 }
